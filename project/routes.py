@@ -3,7 +3,7 @@ from flask_login import login_user, login_required, logout_user
 from werkzeug.security import check_password_hash, generate_password_hash
 
 from project import app, db
-from project.models import Message, User
+from project.models import Message, User, Item
 
 
 @app.route('/', methods=['GET'])
@@ -14,7 +14,12 @@ def hello_world():
 @app.route('/main', methods=['GET'])
 @login_required
 def main():
-    return render_template('main.html', messages=Message.query.all())
+    return render_template('main.html', users=User.query.all())
+
+
+@app.route('/class', methods=['GET'])
+def tasks():
+    return render_template('classes.html', items=Item.query.all())
 
 
 @app.route('/add_message', methods=['POST'])
@@ -56,6 +61,7 @@ def register():
     login = request.form.get('login')
     password = request.form.get('password')
     password2 = request.form.get('password2')
+    miss = request.form.get('missing')
 
     if request.method == 'POST':
         if not (login or password or password2):
@@ -64,7 +70,7 @@ def register():
             flash('Passwords are not equal!')
         else:
             hash_pwd = generate_password_hash(password)
-            new_user = User(login=login, password=hash_pwd)
+            new_user = User(login=login, password=hash_pwd, miss=miss)
             db.session.add(new_user)
             db.session.commit()
 
